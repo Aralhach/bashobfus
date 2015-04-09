@@ -24,7 +24,7 @@ sub parse_cmd_args {
 	my $output_file="";
 	my $delete_blanks="";
 	my $flatten="";
-	my $new_var="a";
+	my $new_variable_prefix="a";
 	for my $argnum (0 .. $#ARGV) {
 		if ($ARGV[$argnum] eq "-i") {
 			$input_file=$ARGV[$argnum+1];
@@ -35,7 +35,7 @@ sub parse_cmd_args {
 		} elsif ($ARGV[$argnum] eq "-h") {
 			&print_usage();
 		} elsif ($ARGV[$argnum] eq "-V") {
-			$new_var=$ARGV[$argnum+1];
+			$new_variable_prefix=$ARGV[$argnum+1];
 			$argnum++;
 		} elsif ($ARGV[$argnum] eq "-C") {
 			$delete_blanks=1;
@@ -47,14 +47,14 @@ sub parse_cmd_args {
 		say "Input or output file not specified!!";
 		&print_usage();
 	}
-	return ($input_file,$output_file,$new_var,$delete_blanks,$flatten);
+	return ($input_file,$output_file,$new_variable_prefix,$delete_blanks,$flatten);
 }
 
 sub parse_vars_from_file {
 	my $file_name=shift;
-	open(my $fh, "<", $file_name) || die "Couldn't open '".$file_name."' for reading because: ".$!;
+	open(my $file_handle, "<", $file_name) || die "Couldn't open '".$file_name."' for reading because: ".$!;
 	my %vars=();
-	while(my $line=<$fh>) {
+	while(my $line=<$file_handle>) {
 		# First pull var names from declarations
 		if ($line =~ m/^[ \t]*([a-z]+[a-z0-9_]*)=/) {
 			$vars{$1}=1;
@@ -69,14 +69,14 @@ sub parse_vars_from_file {
 			$vars{$1}=1;
 		}
 	}
-	close $fh;
+	close $file_handle;
 	return keys %vars;
 }
 
 sub obfuscate {
 	my $input_file=shift;
 	my $output_file=shift;
-	my $new_var=shift;
+	my $new_variable_prefix=shift;
 	my $delete_blanks=shift;
 	my $flatten=shift;
 	my @sorted_vars=@_;
@@ -86,7 +86,7 @@ sub obfuscate {
 	my %var_obfus=();
 	my $var_index=0;
 	for my $var (@sorted_vars) {
-		$var_obfus{$var}=$new_var.$var_index;
+		$var_obfus{$var}=$new_variable_prefix.$var_index;
 		$var_index++;
 	}
 	my %vars=();
@@ -130,7 +130,7 @@ sub obfuscate {
 	close $ofh;
 }
 
-my ($input_file,$output_file,$new_var,$delete_blanks,$flatten)=&parse_cmd_args();
+my ($input_file,$output_file,$new_variable_prefix,$delete_blanks,$flatten)=&parse_cmd_args();
 my @parsed_vars=&parse_vars_from_file($input_file);
 my @sorted_vars = sort { length($b) <=> length($a) } @parsed_vars;
-&obfuscate($input_file,$output_file,$new_var,$delete_blanks,$flatten,@sorted_vars);
+&obfuscate($input_file,$output_file,$new_variable_prefix,$delete_blanks,$flatten,@sorted_vars);
