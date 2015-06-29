@@ -91,7 +91,7 @@ sub obfuscate {
 	}
 	my %vars=();
 	while(my $line=<$ifh>) {
-		if ($delete_blanks && (($line =~ m/^#[^!].*/) || ($line =~ m/^[ \t]*$/))) {
+		if ($delete_blanks && (($line =~ m/^[ \t]*#[^!].*/) || ($line =~ m/^[ \t]*$/))) {
 			next;
 		}
 		if ($flatten) {
